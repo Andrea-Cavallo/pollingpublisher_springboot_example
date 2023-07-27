@@ -1,25 +1,36 @@
-#  Progetto di Simulazione di Cattura da un DB Legacy
 
-Questo progetto simula la necessità di catturare cambiamenti da un database legacy (in questo caso, SQLServer) utilizzando una REST API creata ad hoc. Il cuore di questa simulazione sfrutta il Change Data Capture (CDC), in particolare tramite l'uso di SpringBoot e Debezium Embedded.
+# Overview
 
-## Panoramica
-La nostra architettura è strutturata in modo tale che tutti i cambiamenti sulla tabella dbo.outbox vengano catturati e gestiti. In aggiunta, è stato applicato il pattern outbox per garantire l'atomicità delle operazioni e la consistenza dei dati.
+This project simulates the need to capture changes from a legacy database (in this case, SQLServer) using a custom-built REST API. The core of this simulation leverages Change Data Capture (CDC), particularly through the use of SpringBoot and Debezium Embedded.
+Our architecture is structured in a way that all changes to the dbo.outbox table are captured and handled. Additionally, the outbox pattern has been applied to ensure atomicity of operations and data consistency.
 
-## Kafka e Docker Compose
-Per simulare l'ambiente distribuito, abbiamo incorporato Kafka e un'interfaccia Kafka UI, entrambi eseguiti attraverso Docker Compose. In questo modo, possiamo simulare facilmente l'invio di messaggi e l'interazione tra i microservizi.
-Secondo Microservizio e Kafka Producer
 
-## Primo Microservizio [crud-sqlserver-ms]
-Il primo microservizio svolge un ruolo fondamentale all'interno del nostro progetto: simula un database legacy, nel nostro caso SQLServer. Questo si rende possibile attraverso l'implementazione di un modello di dati e delle funzionalità che riflettono quelle di un tipico database SQLServer.
-In aggiunta alla simulazione del DB, il primo microservizio applica anche il pattern Outbox. Questo modello di design consente di assicurare l'atomicità delle operazioni e la consistenza dei dati nel contesto di un sistema distribuito.
+## Kafka and Docker Compose
+To simulate the distributed environment, we have incorporated Kafka and a Kafka UI interface, both running through Docker Compose. This allows us to easily simulate message sending and interactions between microservices.
+Second Microservice and Kafka Producer
 
-## Secondo Microservizio [polling-ms]
-Utilizzando il pattern Polling Publisher, siamo in grado di trasmettere gli eventi al nostro message-broker, svolgendo un ruolo fondamentale nell'interazione dei nostri servizi.
-Conserviamo lo stato degli eventi nell'Outbox, dove monitoriamo l'ACK al momento della pubblicazione. Questo sistema di verifica ci consente di garantire la ricezione di ogni evento. Inoltre, esiste la possibilità per il consumatore di segnare un evento come "correttamente processato" utilizzando peresempio un correlation-id.
-A differenza di quanto visto nell'altro esempio con CDC- Debezium questa volta abbiamo implementato PollingPublisher pattern
-Da notare come è stato implementato lo scheduler
-In particolare è stata fatta una assunzione, ovvero che al tempo t0 debba esser fatta una findAll mentre al tempo t1, si fara' una query in base a un certo istante di tempo, cosi da stare in ascolto e catturare "manualmente" tutte le eventuali modifiche.
+## First Microservice [crud-sqlserver-ms]
+The first microservice plays a crucial role in our project: it simulates a legacy database, in our case, SQLServer. This is made possible by implementing a data model and functionalities that reflect those of a typical SQLServer database.
+In addition to simulating the DB, the first microservice also applies the Outbox pattern. This design pattern ensures the atomicity of operations and data consistency within the context of a distributed system.
 
+## Second Microservice [polling-ms]
+Using the Polling Publisher pattern, we can send events to our message broker, playing a fundamental role in our services' interactions.
+We keep track of event states in the Outbox, where we monitor ACKs at the time of publication. This verification system ensures that each event is received. Furthermore, there is a possibility for the consumer to mark an event as "correctly processed" using, for example, a correlation-id.
+Unlike the previous example with CDC-Debezium, this time, we have implemented the Polling Publisher pattern.
+Note how the scheduler has been implemented.
+In particular, an assumption has been made that at time t0, a findAll should be done, while at time t1, a query will be made based on a certain time instant, so as to listen and manually capture all possible modifications.
+
+## Third Microservice [polling-consumer-ms]
+This is the third microservice responsible for consuming all the potential topics produced by polling-ms; once consumed, they are stored in MongoDB.
+
+
+## How to Use
+To try the complete flow and test everything locally, you will need Docker. After that, you will need to bring up all the images using docker-compose up. Once this is done, you will need to set up a connection to a SQL Server database. In this case, I used Azure, and you can follow a simple guide here: https://www.youtube.com/watch?v=kMCNTLnna04&ab_channel=SQLServer101. As for MongoDB, you just need to have an account on MongoCloud and create a database.
+Once you have both databases set up and the images are up using Docker Compose, you will also have access to Kafka UI, which was chosen for monitoring various topics, messages, and other details accessible in this case via localhost:8080. I used SpringToolSuite as my IDE and Java 11 with Lombok and Maven.
+
+
+## Links 
+For more information, graphics, etc., you can find everything at: https://medium.com/@andreacavallo
 
 ## Autore
 Andrea Cavallo
