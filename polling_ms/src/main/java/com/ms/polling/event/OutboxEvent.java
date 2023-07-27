@@ -15,7 +15,7 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @EqualsAndHashCode
-public class OutboxEvent {
+public class OutboxEvent implements Event{
 	private Long id;
 
 	private Long aggregateId;
